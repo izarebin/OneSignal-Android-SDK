@@ -27,7 +27,10 @@
 
 package com.onesignal;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -91,6 +94,16 @@ public class SyncService extends Service {
    public void onTaskRemoved(Intent rootIntent) {
       super.onTaskRemoved(rootIntent);
       onTaskRemoved();
+      stopSelf();
+
+      Intent intent = new Intent(this, SyncService.class);
+      PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
+      AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+      // 10 seconds
+      long timeInMillis = (System.currentTimeMillis() + 10000) / 1000 * 1000;
+      alarm.set(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+
+//      startService(new Intent(this, SyncService.class));
    }
 
    // NOTE: Currently onTaskRemoved takes about 100ms to run.
